@@ -26,7 +26,8 @@
         <Button Grid.Row="0" Grid.Column="1" Content="Open Json File"
                 Command="{Binding OpenFile}"/>
         <Button Grid.Row="0" Grid.Column="2" Content="click"
-                Command="{Binding GetImageUrlCommand}"/>
+                Command="{Binding GetImageUrlCommand}"
+                CommandParameter="{Binding JsonString}"/>
 
         <TextBox Grid.Row="1" Grid.Column="0" 
                  Grid.ColumnSpan="3" 

@@ -83,7 +83,13 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="HomeworkItem.cs" />
+    <Compile Include="HomeworkModel\HomeworkContent.cs" />
+    <Compile Include="HomeworkModel\HomeworkContentMain.cs" />
+    <Compile Include="HomeworkModel\HomeworkData.cs" />
+    <Compile Include="HomeworkModel\HomeworkItem.cs" />
+    <Compile Include="HomeworkModel\HomeworkText.cs" />
+    <Compile Include="HomeworkModel\HomeworkTextItem.cs" />
+    <Compile Include="HomeworkModel\HomeworkWrapper.cs" />
     <Compile Include="MainFormViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -118,5 +124,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

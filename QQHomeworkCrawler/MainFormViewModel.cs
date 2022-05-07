@@ -77,12 +77,19 @@ namespace QQHomeworkCrawler
 
         private void OpenJsonFile(string obj)
         {
-            var result = new OpenFileDialog().ShowDialog();
+            var openFileDialog = new OpenFileDialog {Filter = "Json File | *.json"};
+            var result = openFileDialog.ShowDialog();
+            if (!result.HasValue || !result.Value)
+                return;
+
+            var fileName = openFileDialog.FileName;
+            using (var reader = new StreamReader(fileName, Encoding.UTF8))
+                JsonString = reader.ReadToEnd();
         }
 
-        private static void GetImageUrls(string json)
+        private void GetImageUrls(string json)
         {
-            var result = JsonConvert.DeserializeObject(json);
+            var result = JsonConvert.DeserializeObject<HomeworkWrapper>(json);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
