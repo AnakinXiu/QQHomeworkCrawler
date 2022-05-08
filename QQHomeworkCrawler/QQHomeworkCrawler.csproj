@@ -90,6 +90,7 @@
     <Compile Include="HomeworkModel\HomeworkText.cs" />
     <Compile Include="HomeworkModel\HomeworkTextItem.cs" />
     <Compile Include="HomeworkModel\HomeworkWrapper.cs" />
+    <Compile Include="HomeworkViewModel.cs" />
     <Compile Include="MainFormViewModel.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
