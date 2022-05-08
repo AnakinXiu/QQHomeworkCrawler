@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -8,6 +10,7 @@ using System.Text;
 using System.Windows.Input;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Threading.Tasks;
 using Microsoft.Win32;
 using MoreLinq;
 using Newtonsoft.Json;
@@ -19,6 +22,7 @@ namespace QQHomeworkCrawler
     public class MainFormViewModel : INotifyPropertyChanged
     {
         private string _jsonString;
+        private ObservableCollection<HomeworkViewModel> _homeworkEntities;
 
         public string JsonString
         {
@@ -30,23 +34,58 @@ namespace QQHomeworkCrawler
             }
         }
 
+        public ObservableCollection<HomeworkViewModel> HomeworkEntities
+        {
+            get => _homeworkEntities;
+            set
+            {
+                _homeworkEntities = value;
+                OnPropertyChanged(nameof(HomeworkEntities));
+            }
+        }
+
         public ICommand GetImageUrlCommand { get; }
         public ICommand OpenFile { get; }
         public ICommand FindJpgCommand { get; }
         public ICommand GetImageCommand { get; }
-        
+
         public MainFormViewModel()
         {
             OpenFile = new DelegateCommand<string>(OpenJsonFile);
             GetImageUrlCommand = new DelegateCommand<string>(GetImageUrls);
             FindJpgCommand = new DelegateCommand<string>(FindJpg);
-            GetImageCommand = new DelegateCommand<string>(GetImage);
+            GetImageCommand = new DelegateCommand(GetHomeworkContentText);
+        }
+
+        private void GetHomeworkContentText()
+        {
+            Parallel.ForEach(
+                HomeworkEntities.Select(entity => (entity.StudentName, entity.ImageUrl)),
+                item => DownloadImage(item.StudentName, item.ImageUrl));
+        }
+
+        private static void DownloadImage(string studentName, IEnumerable<string> imageUrls)
+        {
+            using (var webClient = new WebClient())
+            {
+                imageUrls.ForEach((url, i) =>
+                {
+                    var data = webClient.DownloadData(url);
+                    using (var memStream = new MemoryStream(data))
+                    {
+                        var image = Image.FromStream(memStream);
+                        if (!Directory.Exists("Images/"))
+                            Directory.CreateDirectory("Images/");
+
+                        image.Save($"Images/{studentName}{(i == 0 ? string.Empty : i.ToString())}.jpg",
+                            ImageFormat.Jpeg);
+                    }
+                });
+            }
         }
 
         private void GetImage(string obj)
         {
-            var urlList = JsonString.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
-
             using (var webClient = new WebClient())
             {
                 JsonString.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries)
@@ -89,7 +128,14 @@ namespace QQHomeworkCrawler
 
         private void GetImageUrls(string json)
         {
-            var result = JsonConvert.DeserializeObject<HomeworkWrapper>(json);
+            HomeworkEntities = new ObservableCollection<HomeworkViewModel>(
+                JsonConvert.DeserializeObject<HomeworkWrapper>(json)
+                    .data
+                    .Feedback
+                    .Select(item => new HomeworkViewModel(
+                        item.nick,
+                        item.content.main.SelectMany(content => content.text.c.Where(i => i.type.Equals("img")).Select(i => i.url)))
+                    ));
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
